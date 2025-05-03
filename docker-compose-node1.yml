@@ -1,0 +1,75 @@
+services:
+  mongodb:
+    image: "mongo:6.0.18"
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: "on-failure"
+    networks:
+      - graylog_network
+    volumes:
+      - "mongodb_data:/data/db"
+      - "/etc/localtime:/etc/localtime:ro"
+  graylog1:
+    image: graylog/graylog:6.1.10
+    container_name: graylog1
+    environment:
+      - is_master=true
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
+        #- GRAYLOG_ROOT_PASSWORD_SHA2=9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://graylog1:9000/
+      - GRAYLOG_HTTP_BIND_ADDRESS=0.0.0.0:9000
+      - GRAYLOG_MONGODB_URI= mongodb://mongodb:27017/graylog
+      - GRAYLOG_ELASTICSEARCH_HOSTS=${GRAYLOG_ELASTICSEARCH_HOSTS}
+      - GRAYLOG_SERVER_ID=graylog1
+      - GRAYLOG_CLUSTER_HOSTS=graylog1:9000,graylog2:9000
+      - GRAYLOG_TIMEZONE=Asia/Tehran
+      - GRAYLOG_ROOT_TIMEZONE=Asia/Tehran
+      - GRAYLOG_REST_TRANSPORT_URI=http://graylog1:9000/api/
+      - GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000/
+    ports:
+      # Graylog web interface and REST API
+      - "9000:9000/tcp"
+      # Beats
+      - "5044:5044/tcp"
+      # Syslog TCP
+      - "5140:5140/tcp"
+      # Syslog UDP
+      - "5140:5140/udp"
+      # GELF TCP
+      - "12201:12201/tcp"
+      # GELF UDP
+      - "12201:12201/udp"
+      # Forwarder data
+      - "13301:13301/tcp"
+      # Forwarder config
+      - "13302:13302/tcp"
+    restart: "on-failure"
+    extra_hosts:
+      - "graylog2: 172.16.66.135"
+      - "mongodb: 172.16.66.134"
+    volumes:
+      - "graylog_data:/usr/share/graylog/data/data"
+      - "graylog_config:/usr/share/graylog/data/config"
+      - "graylog_journal:/usr/share/graylog/data/journal"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./GeoLite2-ASN.mmdb:/etc/graylog/server/GeoLite2-ASN.mmdb"
+      - "./GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb"
+
+
+
+volumes:
+  mongodb_data:
+    driver: local
+  graylog_data:
+    driver: local
+  graylog_config:
+    driver: local
+  graylog_journal:
+    driver: local
+
+
+networks:
+  graylog_network:
+    driver: bridge
