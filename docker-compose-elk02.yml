@@ -1,47 +1,46 @@
 version: '3'
 services:
   es02:
-    image:  docker.elastic.co/elasticsearch/elasticsearch:8.2.0
+    image:  docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     container_name: elasticsearch
     restart: always
     environment:
-  - node.name=es02
-  - cluster.name=es-cluster
-  - ELASTIC_USERNAME=elastic        
-  - ELASTIC_PASSWORD=changeme        
-  - discovery.seed_hosts=192.168.100.97,192.168.100.99
-  - cluster.initial_master_nodes=192.168.100.97,192.168.100.98,192.168.100.99
-  - bootstrap.memory_lock=true
-  - "ES_JAVA_OPTS=-Xms6g -Xmx6g"
-  - transport.publish_host=192.168.100.98
-  - xpack.security.enabled=true
-  - xpack.security.http.ssl.enabled=false
-  - xpack.security.http.ssl.key=certs/es02/es02.key
-  - xpack.security.http.ssl.certificate=certs/es02/es02.crt
-  - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-  - xpack.security.http.ssl.verification_mode=certificate
-  - xpack.security.transport.ssl.enabled=true
-  - xpack.security.transport.ssl.key=certs/es02/es02.key
-  - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
-  - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
-  - xpack.security.transport.ssl.verification_mode=certificate
-  - xpack.license.self_generated.type=${LICENSE}
-ulimits:
-  nofile:
-    soft: 65536
-    hard: 65536
-  memlock:
-    soft: -1
-    hard: -1
-volumes:
-  - elastic-data:/usr/share/elasticsearch/data
-  - /etc/localtime:/etc/localtime:ro
-  - /var/lib/docker/volumes/certs/_data/:/usr/share/elasticsearch/config/certs
-  - ./certs:/usr/share/elasticsearch/config/certs
+      - node.name=es02
+      - cluster.name=es-cluster
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - discovery.seed_hosts=IPnode01,IPnode03
+      - cluster.initial_master_nodes=IPnode01,IPnode02,IPnode03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms6g -Xmx6g"
+      - transport.publish_host=IPnode02
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.http.ssl.key=certs/es02/es02.key
+      - xpack.security.http.ssl.certificate=certs/es02/es02.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.http.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/es02/es02.key
+      - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elastic-data02:/usr/share/elasticsearch/data
+      - /etc/localtime:/etc/localtime:ro
+      - /var/lib/docker/volumes/certs/_data/:/usr/share/elasticsearch/config/certs
+      - ./certs:/usr/share/elasticsearch/config/certs
 
-ports:
-  - 9200:9200
-  - 9300:9300
-
+    ports:
+      - 9200:9200
+      - 9300:9300
 volumes:
-  elastic-data:
+  elastic-data02:
